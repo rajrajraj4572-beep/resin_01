@@ -25,6 +25,7 @@
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
   html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
@@ -38,16 +39,27 @@
   a { color: var(--accent); text-decoration: none; font-weight: 600; }
   .wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
-  /* Header */
+  /* Header + menu */
   header { border-bottom: 1px solid var(--border); }
   header .wrap {
     display: flex; justify-content: space-between; align-items: center;
-    padding-top: 18px; padding-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    flex-wrap: wrap; padding-top: 18px; padding-bottom: 18px; gap: 10px;
   }
   .logo { font-size: 1.4rem; font-weight: 700; color: var(--text); }
   nav { display: flex; gap: 20px; }
   nav a { color: var(--muted); font-weight: 500; }
   nav a:hover { color: var(--accent); }
+  .menu-toggle {
+    display: none; background: var(--card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 6px 14px; font-size: 1.3rem; line-height: 1.2; cursor: pointer;
+  }
+  @media (max-width: 640px) {
+    .menu-toggle { display: block; }
+    nav { display: none; width: 100%; flex-direction: column; gap: 0; }
+    nav.open { display: flex; }
+    nav a { padding: 12px 4px; border-top: 1px solid var(--border); }
+  }
 
   /* Hero */
   .hero {
@@ -67,7 +79,7 @@
   .btn.primary { background: var(--accent); color: #fff; }
   .btn.ghost { background: var(--card); color: var(--text); border-color: var(--border); }
   .btn:hover { opacity: .88; }
-  .btn:focus-visible, a:focus-visible, button:focus-visible {
+  .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible {
     outline: 3px solid var(--accent); outline-offset: 3px;
   }
 
@@ -75,6 +87,30 @@
   section { padding: 70px 0; }
   h2 { font-size: 2rem; margin-bottom: 8px; }
   .sub { color: var(--muted); margin-bottom: 32px; }
+  .center { text-align: center; }
+
+  /* Search + category filters */
+  .tools { margin-bottom: 26px; display: grid; gap: 14px; }
+  .search { position: relative; }
+  .search input {
+    width: 100%; padding: 13px 44px 13px 18px; font-size: 1rem;
+    border: 1px solid var(--border); border-radius: 999px;
+    background: var(--card); color: var(--text);
+  }
+  .search .clear {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted);
+    font-size: 1.4rem; cursor: pointer; padding: 4px 10px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 8px 18px; border-radius: 999px; cursor: pointer;
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--border); font-size: .95rem; font-weight: 600;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 
   /* Product cards */
   .grid {
@@ -85,10 +121,16 @@
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); overflow: hidden;
     display: flex; flex-direction: column;
+    transition: box-shadow .2s ease, transform .2s ease;
   }
-  .card img.photo {
+  .card:hover { box-shadow: 0 10px 28px rgba(0,0,0,.08); transform: translateY(-3px); }
+  .card img.photo, .card .ph {
     display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
   }
+  /* Colour placeholders: replace a <div class="ph ..."> with an <img class="photo"> when you have a photo */
+  .ph1 { background: linear-gradient(135deg, #1a9090, #7ccfd0, #e8dfb0); }
+  .ph2 { background: linear-gradient(135deg, #6b3fa0, #c27bff, #f8c8e8); }
+  .ph3 { background: linear-gradient(135deg, #e07a5f, #f2cc8f, #81b29a); }
   .card .body { padding: 16px; display: flex; flex-direction: column; flex: 1; }
   .card h3 { font-size: 1.05rem; margin-bottom: 6px; }
   .card p { color: var(--muted); font-size: .95rem; margin-bottom: 10px; }
@@ -102,11 +144,23 @@
     font-weight: 600; font-size: .95rem; cursor: pointer;
     transition: transform .15s ease, opacity .15s ease;
   }
-  .buy-btn { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+  .buy-btn, .ask-btn.solid { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
   .ask-btn { background: transparent; color: var(--accent); border: 1px solid var(--border); }
   .buy-btn:hover, .ask-btn:hover { opacity: .9; transform: translateY(-2px); }
 
-  .g3 { background: linear-gradient(135deg, #e07a5f, #f2cc8f, #81b29a); }
+  /* Why choose us + how to order */
+  .alt { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .tiles { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 34px; }
+  .tile { text-align: center; padding: 8px 12px; }
+  .tile .icon { font-size: 2rem; margin-bottom: 8px; }
+  .tile h3 { font-size: 1.1rem; margin-bottom: 6px; }
+  .tile p { color: var(--muted); font-size: .97rem; }
+  .num {
+    width: 44px; height: 44px; margin: 0 auto 10px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  }
 
   /* Checkout popup */
   dialog {
@@ -129,14 +183,16 @@
     padding: 12px; border-radius: 999px; font-weight: 600; font-size: 1rem; cursor: pointer;
     border: 1px solid var(--accent);
   }
-  .pay-upi { background: var(--accent); color: #fff; }
-  .pay-wa { background: transparent; color: var(--accent); }
+  .pay-wa { background: var(--accent); color: #fff; }
   .d-close { background: none; border: none; color: var(--muted); cursor: pointer; margin-top: 10px; width: 100%; }
   .d-note { font-size: .8rem; color: var(--muted); margin-top: 10px; text-align: center; }
 
   /* About */
   .about { display: grid; gap: 40px; grid-template-columns: 1fr 1fr; align-items: center; }
-  .about .img { height: 210px; border-radius: var(--radius); border: 1px solid var(--border); }
+  .about .img {
+    width: 100%; height: 210px; object-fit: cover;
+    border-radius: var(--radius); border: 1px solid var(--border);
+  }
   @media (max-width: 700px) { .about { grid-template-columns: 1fr; } }
 
   /* Contact */
@@ -146,7 +202,8 @@
   }
   .contact p { margin: 10px 0; }
 
-  footer { text-align: center; color: var(--muted); font-size: .9rem; padding: 50px 20px; }
+  footer { text-align: center; color: var(--muted); font-size: .9rem; padding: 40px 20px 50px; }
+  footer .links { margin-bottom: 10px; display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -154,8 +211,10 @@
 <header>
   <div class="wrap">
     <span class="logo">Resin Art Studio</span>
-    <nav>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav">☰</button>
+    <nav id="nav">
       <a href="#products">Products</a>
+      <a href="#how">How to order</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
     </nav>
@@ -174,139 +233,201 @@
     <div class="wrap">
       <h2>Our products</h2>
       <p class="sub">A few favourites. Every piece is unique, so colours vary slightly.</p>
+
+      <div class="tools">
+        <div class="search">
+          <input id="search" type="search" placeholder="Search products (e.g. rose, keychain, bookmark)" aria-label="Search products" autocomplete="off">
+          <button class="clear" id="clear-search" aria-label="Clear search" hidden>×</button>
+        </div>
+        <div class="chips" id="chips">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="keychains">Keychains</button>
+          <button class="chip" data-filter="bookmarks">Bookmarks</button>
+          <button class="chip" data-filter="jewellery">Jewellery</button>
+          <button class="chip" data-filter="decor">Home Decor</button>
+          <button class="chip" data-filter="gifts">Gifts</button>
+        </div>
+      </div>
+
       <div class="grid">
 
-        <article class="card">
+        <article class="card" data-cat="keychains">
           <img class="photo" src="Images/alphabet-keychains.jpg" alt="Colourful resin alphabet keychains with gold foil">
           <div class="body">
             <h3>Alphabet Keychains</h3>
             <p>Initial keychains in ombre colours with gold foil.</p>
             <span class="price">₹ 100</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Alphabet Keychains" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Alphabet Keychains">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card" data-cat="keychains">
           <img class="photo" src="Images/rose-letter-keychains.jpg" alt="Rose petal resin letter keychains">
           <div class="body">
             <h3>Rose Petal Letter Keychains</h3>
             <p>Real rose petals and copper foil, preserved in resin.</p>
             <span class="price">₹ 130</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Rose Petal Letter Keychains" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Rose Petal Letter Keychains">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card" data-cat="gifts">
           <img class="photo" src="Images/calendar-frame.jpg" alt="Resin calendar plate with rose petals and a photo">
           <div class="body">
             <h3>Birthday Calendar Frame</h3>
             <p>Custom name, date calendar and photo with rose petal edges.</p>
             <span class="price">₹ 450</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Birthday Calendar Frame" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Birthday Calendar Frame">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card" data-cat="bookmarks">
           <img class="photo" src="Images/rose-bookmarks.jpg" alt="Rose petal resin bookmark with gold tassel">
           <div class="body">
             <h3>Rose Petal Bookmarks</h3>
             <p>Dried rose petals and gold foil, with a tassel.</p>
             <span class="price">₹ 170</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Rose Petal Bookmarks" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Rose Petal Bookmarks">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card" data-cat="bookmarks">
           <img class="photo" src="Images/foil-bookmarks.jpg" alt="Pastel resin bookmarks with gold foil and tassels">
           <div class="body">
             <h3>Gold Foil Bookmarks</h3>
             <p>Pastel colours with gold flakes. Pick your tassel colour.</p>
             <span class="price">₹ 140</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Gold Foil Bookmarks" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Gold Foil Bookmarks">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card" data-cat="keychains">
           <img class="photo" src="Images/word-keychains.jpg" alt="Round black and gold resin keychains with words">
           <div class="body">
             <h3>Word Keychains</h3>
             <p>Round black and gold keychains with a word of your choice.</p>
             <span class="price">₹ 130</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Word Keychains" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Word Keychains">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
-          <img class="photo" src="Images/WhatsApp Image 2026-10-20 at 9.44.59 PM.jpeg" alt="Round black and gold resin keychains with words">
+        <article class="card" data-cat="jewellery">
+          <img class="photo" src="Images/WhatsApp Image 2026-10-20 at 9.44.59 PM.jpeg" alt="Heart shaped rose petal resin pendant with gold foil">
           <div class="body">
-            <h3>Rose Pendent</h3>
-            <p>Heart shape rose pendent with gold accents.</p>
+            <h3>Rose Pendant</h3>
+            <p>Heart shape rose pendant with gold accents.</p>
             <span class="price">₹ 180</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Word Keychains" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Word Keychains">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-        <article class="card">
-          <img class="photo" src="Images/WhatsApp Image 2026-10-20 at 9.45.10 PM.jpeg" alt="Round black and gold resin keychains with words">
+        <article class="card" data-cat="keychains">
+          <img class="photo" src="Images/WhatsApp Image 2026-10-20 at 9.45.10 PM.jpeg" alt="Resin initial keychain with a leaf charm">
           <div class="body">
-            <h3>Key chain</h3>
-            <p>Key chain with a unique design.</p>
+            <h3>Initial Keychain with Leaf Charm</h3>
+            <p>Your letter in blush and coral, with silver foil and a leaf charm.</p>
             <span class="price">₹ 120</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Word Keychains" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Word Keychains">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
-
-        <article class="card">
-          <img class="photo" src="Images/WhatsApp Image 2026-10-20 at 9.45.34 PM.jpeg" alt="Round black and gold resin keychains with words">
+        <article class="card" data-cat="jewellery">
+          <img class="photo" src="Images/WhatsApp Image 2026-10-20 at 9.45.34 PM.jpeg" alt="Jhumka earrings with preserved rose petals in resin">
           <div class="body">
-            <h3>Rose preserved Jhumka</h3>
-            <p>jhumkas made with rose and resin.</p>
+            <h3>Rose Preserved Jhumka</h3>
+            <p>Jhumkas made with real rose petals and resin.</p>
             <span class="price">₹ 250</span>
             <div class="card-actions">
-              <button class="buy-btn" data-name="Word Keychains" data-price="0000">Buy now</button>
-              <a class="ask-btn" target="_blank" rel="noopener" href="#" data-ask="Word Keychains">Ask first</a>
+              <button class="buy-btn">Buy now</button>
+              <a class="ask-btn" target="_blank" rel="noopener" href="#">Ask first</a>
             </div>
           </div>
         </article>
 
+        
 
+      </div>
+      <p class="empty" id="empty" hidden>No products found. Try a different word or category.</p>
+    </div>
+  </section>
 
+  <section class="alt" id="why">
+    <div class="wrap center">
+      <h2>Why choose us</h2>
+      <div class="tiles">
+        <div class="tile">
+          <div class="icon">🎨</div>
+          <h3>Handmade, one at a time</h3>
+          <p>Every piece is poured and finished by hand, so no two are exactly alike.</p>
+        </div>
+        <div class="tile">
+          <div class="icon">🌹</div>
+          <h3>Real flowers, preserved</h3>
+          <p>Rose petals and gold or silver foil, sealed in resin to keep for years.</p>
+        </div>
+        <div class="tile">
+          <div class="icon">🎁</div>
+          <h3>Made personal</h3>
+          <p>Choose your colours, names, dates or photos for a gift that is truly yours.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="about">
+  <section id="how">
+    <div class="wrap center">
+      <h2>How to order</h2>
+      <div class="tiles">
+        <div class="tile">
+          <div class="num">1</div>
+          <h3>Choose a piece</h3>
+          <p>Pick something from the collection, or tell us your own idea.</p>
+        </div>
+        <div class="tile">
+          <div class="num">2</div>
+          <h3>Confirm the details</h3>
+          <p>Share your colours, name or photo, and we confirm the price and payment on WhatsApp.</p>
+        </div>
+        <div class="tile">
+          <div class="num">3</div>
+          <h3>We make it for you</h3>
+          <p>Your piece is made by hand and sent to your address.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="about">
     <div class="wrap about">
       <div>
         <h2>About the studio</h2>
         <p>We create resin art by hand, one piece at a time. Tell us your colours, your occasion or your idea, and we will turn it into something you can keep for years.</p>
       </div>
-      <img class="img" src="Images/WhatsApp Image 2026-10-20 at 9.18.39 PM.jpeg" alt="A resin art piece with dried flowers and gold foil">
+      <img class="img" src="Images/WhatsApp Image 2026-10-21 at 12.32.51 PM.jpeg" alt="A resin art piece with dried flowers and gold foil">
     </div>
   </section>
 
@@ -316,7 +437,6 @@
         <h2>Order or ask for a custom piece</h2>
         <p class="sub">Message us with what you have in mind.</p>
         <p>
-          
           Instagram: <a href="https://www.instagram.com/colours.ofcalm?vrfl=MWNicTlnNDF1aXI5cQ==">colours.ofcalm</a>
         </p>
         <p>Email: <a href="mailto:nandaniarts20@gmail.com">nandaniarts20@gmail.com</a></p>
@@ -325,7 +445,15 @@
   </section>
 </main>
 
-<footer>© Resin Art Studio. Handmade with care.</footer>
+<footer>
+  <div class="links">
+    <a href="#products">Products</a>
+    <a href="#how">How to order</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+  © Resin Art Studio. Handmade with care.
+</footer>
 
 <!-- Checkout popup -->
 <dialog id="checkout">
@@ -339,35 +467,84 @@
   <textarea id="c-addr" rows="3" autocomplete="street-address"></textarea>
 
   <div class="d-actions">
-    <button class="pay-upi" id="btn-upi">Pay with UPI</button>
     <button class="pay-wa" id="btn-wa">Send order on WhatsApp</button>
   </div>
-  <p class="d-note">UPI opens your payment app on a phone. After paying, send us the screenshot on WhatsApp.</p>
+  <p class="d-note">Your order opens in WhatsApp. We will reply with payment details.</p>
   <button class="d-close" id="btn-close">Cancel</button>
 </dialog>
 
 <script>
-  // ====== CHANGE THESE ======
-  const WHATSAPP = "910000000000";      // 91 + your 10-digit number
-  const UPI_ID   = "yourname@upi";      // your UPI ID
-  const STUDIO   = "Resin Art Studio";
-  // ==========================
+  // ====== CHANGE THIS ======
+  const WHATSAPP = "7050933423";      // 91 + your 10-digit number
+  // =========================
 
+  /* ---------- Menu (mobile) ---------- */
+  const menuBtn = document.getElementById("menu-toggle");
+  const nav = document.getElementById("nav");
+  menuBtn.addEventListener("click", () => {
+    const open = nav.classList.toggle("open");
+    menuBtn.setAttribute("aria-expanded", open);
+    menuBtn.textContent = open ? "✕" : "☰";
+  });
+  nav.querySelectorAll("a").forEach(a => a.addEventListener("click", () => {
+    nav.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded", "false");
+    menuBtn.textContent = "☰";
+  }));
+
+  /* ---------- Search + category filter ---------- */
+  const cards = [...document.querySelectorAll(".card")];
+  const searchBox = document.getElementById("search");
+  const clearBtn = document.getElementById("clear-search");
+  const emptyMsg = document.getElementById("empty");
+  const chips = [...document.querySelectorAll(".chip")];
+  let category = "all";
+
+  function applyFilter() {
+    const q = searchBox.value.trim().toLowerCase();
+    let shown = 0;
+    cards.forEach(card => {
+      const text = (card.querySelector("h3").textContent + " " +
+                    card.querySelector("p").textContent).toLowerCase();
+      const ok = (category === "all" || card.dataset.cat === category) && text.includes(q);
+      card.hidden = !ok;
+      if (ok) shown++;
+    });
+    emptyMsg.hidden = shown > 0;
+    clearBtn.hidden = q === "";
+  }
+
+  searchBox.addEventListener("input", applyFilter);
+  clearBtn.addEventListener("click", () => { searchBox.value = ""; applyFilter(); searchBox.focus(); });
+  chips.forEach(chip => chip.addEventListener("click", () => {
+    category = chip.dataset.filter;
+    chips.forEach(c => c.classList.toggle("active", c === chip));
+    applyFilter();
+  }));
+
+  /* ---------- Ask links ---------- */
+  cards.forEach(card => {
+    const name = card.querySelector("h3").textContent.trim();
+    const ask = card.querySelector(".ask-btn");
+    const hasPrice = /\d/.test(card.querySelector(".price").textContent);
+    const msg = hasPrice
+      ? "Hi! I have a question about " + name
+      : "Hi! Please share the price and details for " + name;
+    ask.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(msg);
+  });
+
+  /* ---------- Checkout popup ---------- */
   const dlg = document.getElementById("checkout");
   const dName = document.getElementById("d-name");
   const dPrice = document.getElementById("d-price");
   let current = { name: "", price: "0" };
 
-  document.getElementById("wa-link").href = "https://wa.me/" + WHATSAPP;
-
-  document.querySelectorAll("[data-ask]").forEach(a => {
-    const msg = "Hi! I have a question about " + a.dataset.ask;
-    a.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(msg);
-  });
-
-  document.querySelectorAll(".buy-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      current = { name: btn.dataset.name, price: btn.dataset.price };
+  cards.forEach(card => {
+    const buy = card.querySelector(".buy-btn");
+    if (!buy) return;                       // cards with "Ask for price" have no Buy button
+    buy.addEventListener("click", () => {
+      current.name = card.querySelector("h3").textContent.trim();
+      current.price = card.querySelector(".price").textContent.replace(/[^\d.]/g, "");
       dName.textContent = current.name;
       dPrice.textContent = "₹" + current.price;
       dlg.showModal();
@@ -382,15 +559,6 @@
     if (!n || !a) { alert("Please enter your name and delivery address."); return null; }
     return { n, a };
   }
-
-  document.getElementById("btn-upi").addEventListener("click", () => {
-    if (!details()) return;
-    const url = "upi://pay?pa=" + encodeURIComponent(UPI_ID) +
-      "&pn=" + encodeURIComponent(STUDIO) +
-      "&am=" + encodeURIComponent(current.price) +
-      "&cu=INR&tn=" + encodeURIComponent(current.name);
-    window.location.href = url;
-  });
 
   document.getElementById("btn-wa").addEventListener("click", () => {
     const d = details();
