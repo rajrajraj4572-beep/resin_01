@@ -33,7 +33,7 @@
     font-family: Georgia, "Times New Roman", serif;
     line-height: 1.6;
   }
-  h1, h2, h3, nav, .btn, .price, button, input, textarea, .card-actions a {
+  h1, h2, h3, nav, .btn, .price, button, input, textarea, select, .card-actions a {
     font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   }
   a { color: var(--accent); text-decoration: none; font-weight: 600; }
@@ -166,18 +166,22 @@
   dialog {
     border: 1px solid var(--border); border-radius: var(--radius);
     background: var(--card); color: var(--text);
-    padding: 26px; width: min(420px, 92vw);
+    padding: 26px; width: min(420px, calc(100vw - 24px));
+    max-height: 90vh; max-height: 90dvh; overflow-y: auto;
+    overscroll-behavior: contain;
     margin: auto;
   }
   dialog::backdrop { background: rgba(0,0,0,.5); }
   dialog h3 { font-size: 1.3rem; }
   .d-price { color: var(--accent); font-weight: 700; font-size: 1.2rem; margin: 4px 0 16px; }
   dialog label { display: block; font-size: .9rem; color: var(--muted); margin-bottom: 4px; }
-  dialog input, dialog textarea {
+  dialog input, dialog textarea, dialog select {
     width: 100%; padding: 10px 12px; margin-bottom: 14px;
     border: 1px solid var(--border); border-radius: 10px;
     background: var(--bg); color: var(--text); font-size: 1rem;
   }
+  .row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; }
+  .row > div { min-width: 0; }
   .d-actions { display: grid; gap: 8px; margin-top: 4px; }
   .d-actions button {
     padding: 12px; border-radius: 999px; font-weight: 600; font-size: 1rem; cursor: pointer;
@@ -194,6 +198,10 @@
     border-radius: var(--radius); border: 1px solid var(--border);
   }
   @media (max-width: 700px) { .about { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) {
+    dialog { padding: 20px; }
+    .row { grid-template-columns: 1fr; gap: 0; }
+  }
 
   /* Contact */
   .contact {
@@ -463,8 +471,22 @@
   <label for="c-name">Your name</label>
   <input id="c-name" type="text" autocomplete="name">
 
-  <label for="c-addr">Delivery address</label>
-  <textarea id="c-addr" rows="3" autocomplete="street-address"></textarea>
+  <label for="c-house">House no. / Locality</label>
+  <input id="c-house" type="text" autocomplete="address-line1">
+
+  <label for="c-landmark">Landmark (optional)</label>
+  <input id="c-landmark" type="text">
+
+  <div class="row">
+    <div>
+      <label for="c-pin">Pincode</label>
+      <input id="c-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="postal-code">
+    </div>
+    <div>
+      <label for="c-state">State</label>
+      <select id="c-state" autocomplete="address-level1"><option value="">Select state</option></select>
+    </div>
+  </div>
 
   <div class="d-actions">
     <button class="pay-wa" id="btn-wa">Send order on WhatsApp</button>
@@ -553,11 +575,28 @@
 
   document.getElementById("btn-close").addEventListener("click", () => dlg.close());
 
+  /* ---------- State list ---------- */
+  const STATES = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
+    "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra",
+    "Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu",
+    "Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+    "Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi",
+    "Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"];
+  const stateSel = document.getElementById("c-state");
+  STATES.forEach(st => stateSel.add(new Option(st, st)));
+
   function details() {
-    const n = document.getElementById("c-name").value.trim();
-    const a = document.getElementById("c-addr").value.trim();
-    if (!n || !a) { alert("Please enter your name and delivery address."); return null; }
-    return { n, a };
+    const d = {
+      n: document.getElementById("c-name").value.trim(),
+      house: document.getElementById("c-house").value.trim(),
+      landmark: document.getElementById("c-landmark").value.trim(),
+      pin: document.getElementById("c-pin").value.trim(),
+      state: stateSel.value
+    };
+    if (!d.n || !d.house) { alert("Please enter your name and house no. / locality."); return null; }
+    if (!/^\d{6}$/.test(d.pin)) { alert("Please enter a valid 6-digit pincode."); return null; }
+    if (!d.state) { alert("Please select your state."); return null; }
+    return d;
   }
 
   document.getElementById("btn-wa").addEventListener("click", () => {
@@ -566,7 +605,10 @@
     const msg = "New order\nProduct: " + current.name +
       "\nPrice: ₹" + current.price +
       "\nName: " + d.n +
-      "\nAddress: " + d.a;
+      "\nHouse no./Locality: " + d.house +
+      (d.landmark ? "\nLandmark: " + d.landmark : "") +
+      "\nPincode: " + d.pin +
+      "\nState: " + d.state;
     window.open("https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(msg), "_blank");
   });
 </script>
